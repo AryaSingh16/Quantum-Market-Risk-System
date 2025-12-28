@@ -1,4 +1,4 @@
-# Quantum Monte Carlo Portfolio Market Risk(v2 to be updated)
+# Quantum Monte Carlo Market Risk System
 
 This project is a full-stack, production-style Quantum Monte Carlo market risk platform for estimating portfolio Value-at-Risk (VaR) and Conditional Value-at-Risk (CVaR).
 It integrates a **quantum-enhanced risk engine, classical benchmarking, regulatory-style backtesting, and an interactive dashboard,** all deployable via Docker.
