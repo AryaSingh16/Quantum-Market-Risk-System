@@ -1,6 +1,7 @@
 # Quantum Monte Carlo Portfolio Market Risk(v2 to be updated)
 
-This project is a Quantum-enhanced Monte Carlo system for estimating portfolio Value-at-Risk (VaR) and Conditional Value-at-Risk (CVaR), benchmarked against classical Monte Carlo under identical assumptions.
+This project is a full-stack, production-style Quantum Monte Carlo market risk platform for estimating portfolio Value-at-Risk (VaR) and Conditional Value-at-Risk (CVaR).
+It integrates a **quantum-enhanced risk engine, classical benchmarking, regulatory-style backtesting, and an interactive dashboard,** all deployable via Docker.
 
 ## Why this Project?
 
@@ -24,17 +25,25 @@ Concretely, the project addresses the problem of:
 - **Risk limit governance** with PASS / WARNING / BREACH flags based on daily VaR.
 - **Basel-style VaR backtesting** using exception counts over many scenarios.
 - **Confidence-level stability analysis** with 95% as the default confidence level.
+- **Fast / Full execution modes** for preview vs official runs.
+- **Interactive Streamlit dashboard** for visualization and reporting.
+- **FastAPI backend orchestrating** deterministic risk-engine execution.
+- **Dockerized deployment** for reproducibility and portability.
 
 ## Architecture
 
 ```bash
-Quantum Sampler → Scenario Mapping → Risk Metrics
-                           ↓
-                  Portfolio Aggregation
-                           ↓
-                  Limits & Backtesting
-```
+Frontend (Streamlit Dashboard)
+            ↓
+Backend API (FastAPI)
+            ↓
+Engine Orchestrator (Subprocess Pipeline)
+            ↓
+Quantum & Classical Risk Engine
+            ↓
+Risk Outputs (VaR, CVaR, Limits, Backtesting)
 
+```
 
 | Stage           | Component              | Purpose                                   |
 |-----------------|------------------------|-------------------------------------------|
@@ -46,19 +55,57 @@ Quantum Sampler → Scenario Mapping → Risk Metrics
 
 ---
 
-## Installation and Running of project
+## Installation and Running (local)
 
 ### File Structure
 ```bash
-├── src/
-│ ├── scenario_portfolio_risk.py # Core quantum vs classical VaR/CVaR + portfolio risk
-│ ├── risk_limits.py # Daily risk limits and status flags
-│ └── backtesting.py # Basel-style portfolio backtesting
-├── data/
-│ └── risk_state.npz # Saved portfolio results (ignored by Git)
-├── figures/ # Generated plots 
-├── requirements.txt # Python dependencies
-└── .gitignore # e.g., pycache/, /data/*.npz
+│
+├── backend/                        # API + engine orchestration
+│   ├── app.py                      # FastAPI application entrypoint
+│   ├── config.py                   # Global paths & environment config
+│   ├── runner.py                   # Subprocess-based engine pipeline
+│   ├── schemas.py                  # API response models
+│   │
+│   └──routes/                     # REST endpoints
+│      ├── health.py               # Health check
+│      ├── run.py                  # Trigger engine execution
+│      ├── results.py              # Serve VaR/CVaR results
+│      ├── limits.py               # Risk limit status endpoint
+│      └── __init__.py
+│   
+│
+├── frontend/                       # Interactive dashboard
+│   ├── dashboard.py                # Streamlit entrypoint
+│   │
+│   └── sections/                   # Modular dashboard views
+│       ├── overview.py             # Summary metrics (VaR / CVaR)
+│       ├── distributions.py        # Return distributions
+│       ├── stress.py               # Stress testing plots
+│       ├── limits.py               # Risk limits & alerts
+│       └── backtesting.py            
+│
+├── src/                            # Core risk engine
+│   ├── scenario_portfolio_risk.py  
+│   ├── risk_limits.py              
+│   └── backtesting.py              
+│
+├── data/                           
+│   ├── risk_state.npz              # (runtime-generated)
+│   └── risk_limits.json            # PASS / WARNING / BREACH status
+│
+├── figures/                        # Engine-generated plots
+│   ├── distribution.png
+│   ├── stress_test.png
+│   ├── risk_limits.png
+│   ├── backtesting.png
+│   └── confidence.png
+│
+├── docker-compose.yml              
+├── Dockerfile                      
+├── requirements.txt                
+├── README.md                       
+└── .gitignore                      
+
 ```
 
 ### Prerequisites
@@ -69,17 +116,33 @@ pip install -r requirements.txt
 ```
 Make sure Python and system packages for PennyLane, SciPy, Matplotlib, and NumPy are available on your machine.
 
-### Run Analysis
+### Run Engine Manually
 ```bash
 python src/scenario_portfolio_risk.py # Single-asset + portfolio baseline quantum vs classical
 python src/risk_limits.py # Daily risk limits and PASS/WARNING/BREACH checks
 python src/backtesting.py # Basel-style portfolio backtesting and exceptions
 ```
+## Running the full platform
+
+### Docker
+```bash
+docker compose up --build
+```
+## Access
+
+**Dashboard:**
+```bash
+http://localhost:8501
+```
+**API Endpoint:**
+```bash
+http://localhost:8000
+```
 --- 
 
 ## Results Overview
 
-The following numbers are representative outputs from a 50,000-scenario run at 95% confidence:
+The following numbers are representative outputs from a 50,000-scenario(FULL) run at 95% confidence:
 
 | Component                 | Quantum          | Classical        |
 |---------------------------|------------------|------------------|
