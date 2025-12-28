@@ -2,3 +2,8 @@ pennylane
 numpy
 scipy
 matplotlib
+fastapi
+uvicorn
+pydantic
+streamlit
+requests

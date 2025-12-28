@@ -1,0 +1,6 @@
+{
+  "Quantum VaR": "WARNING",
+  "Quantum CVaR": "WARNING",
+  "Classical VaR": "BREACH",
+  "Classical CVaR": "BREACH"
+}

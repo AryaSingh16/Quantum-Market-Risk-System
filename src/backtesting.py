@@ -1,8 +1,9 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from src.scenario_portfolio_risk import VaR_CVaR
 
-data = np.load("data\risk_state.npz")
+data = np.load(os.path.join("data", "risk_state.npz"))
 
 portfolio_returns_q = data["portfolio_returns_q"]
 portfolio_returns_c = data["portfolio_returns_c"]
@@ -41,7 +42,7 @@ plt.title("Basel Backtesting: VaR Exceptions")
 plt.legend()
 plt.tight_layout()
 plt.savefig("figures/backtesting.png", dpi=300)
-plt.show()
+plt.close()
 
 
 # ============================================================
@@ -67,5 +68,5 @@ plt.title("Confidence-Level Stability Check")
 plt.legend()
 plt.tight_layout()
 plt.savefig("figures/confidence.png", dpi=300)
-plt.show()
+plt.close()
 

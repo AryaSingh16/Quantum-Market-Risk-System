@@ -1,7 +1,11 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+import os
 
-data = np.load("data\risk_state.npz")
+
+data = np.load(os.path.join("data", "risk_state.npz"))
 
 portfolio_returns_q = data["portfolio_returns_q"]
 portfolio_returns_c = data["portfolio_returns_c"]
@@ -62,5 +66,13 @@ plt.xticks(rotation=20)
 plt.legend()
 plt.tight_layout()
 plt.savefig("figures/risk_limits.png", dpi=300)
-plt.show()
+plt.close()
 
+
+limits_summary = {
+    k: status for k, (_, status) in results.items()
+}
+
+os.makedirs("data", exist_ok=True)
+with open(os.path.join("data", "risk_limits.json"), "w") as f:
+    json.dump(limits_summary, f, indent=2)

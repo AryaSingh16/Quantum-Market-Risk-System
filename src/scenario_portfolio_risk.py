@@ -1,3 +1,4 @@
+import os
 import pennylane as qml
 from pennylane import numpy as np
 from scipy.stats import norm
@@ -13,7 +14,8 @@ T = 1.0
 confidence = 0.95
 
 n_qubits = 6
-shots = 50_000
+shots = 50_000 if os.getenv("QMC_MODE") != "FAST" else 10_000
+
 
 # -----------------------------
 # Quantum device
@@ -80,10 +82,10 @@ if __name__ == "__main__":
     plt.xlabel("Returns")
     plt.ylabel("Density")
     plt.title("Quantum vs Classical Risk Distribution")
-    plt.legend()
+    plt.legend(loc="upper right")
     plt.tight_layout()
     plt.savefig("figures/distribution.png", dpi=300)
-    plt.show()
+    plt.close()
 
 
     # -----------------------------
@@ -113,7 +115,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.tight_layout()
     plt.savefig("figures/stress_test.png", dpi=300)
-    plt.show()
+    plt.close()
 
     # -----------------------------
 
@@ -173,7 +175,7 @@ if __name__ == "__main__":
     print(f"CVaR Error             : {abs(q_port_CVaR - c_port_CVaR):.4f}")
 
     np.savez(
-        "data\risk_state.npz",
+        os.path.join("data", "risk_state.npz"),
         portfolio_returns_q=portfolio_returns_q,
         portfolio_returns_c=portfolio_returns_c,
         q_port_VaR=q_port_VaR,
