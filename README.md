@@ -1,4 +1,4 @@
-# Quantum Monte Carlo Portfolio Market Risk(v2)
+# Quantum Monte Carlo Portfolio Market Risk(v2 to be updated)
 
 This project is a Quantum-enhanced Monte Carlo system for estimating portfolio Value-at-Risk (VaR) and Conditional Value-at-Risk (CVaR), benchmarked against classical Monte Carlo under identical assumptions.
 
@@ -27,6 +27,15 @@ Concretely, the project addresses the problem of:
 
 ## Architecture
 
+```bash
+Quantum Sampler → Scenario Mapping → Risk Metrics
+                           ↓
+                  Portfolio Aggregation
+                           ↓
+                  Limits & Backtesting
+```
+
+
 | Stage           | Component              | Purpose                                   |
 |-----------------|------------------------|-------------------------------------------|
 | **Input**       | Quantum Sampler        | Hadamard-based scenario generation        |
@@ -40,6 +49,7 @@ Concretely, the project addresses the problem of:
 ## Installation and Running of project
 
 ### File Structure
+```bash
 ├── src/
 │ ├── scenario_portfolio_risk.py # Core quantum vs classical VaR/CVaR + portfolio risk
 │ ├── risk_limits.py # Daily risk limits and status flags
@@ -49,21 +59,22 @@ Concretely, the project addresses the problem of:
 ├── figures/ # Generated plots 
 ├── requirements.txt # Python dependencies
 └── .gitignore # e.g., pycache/, /data/*.npz
+```
 
 ### Prerequisites
 
 Clone the repository, then install dependencies from `requirements.txt`:
-
+```bash
 pip install -r requirements.txt
-
+```
 Make sure Python and system packages for PennyLane, SciPy, Matplotlib, and NumPy are available on your machine.
 
 ### Run Analysis
-
+```bash
 python src/scenario_portfolio_risk.py # Single-asset + portfolio baseline quantum vs classical
 python src/risk_limits.py # Daily risk limits and PASS/WARNING/BREACH checks
 python src/backtesting.py # Basel-style portfolio backtesting and exceptions
-
+```
 --- 
 
 ## Results Overview
@@ -80,12 +91,14 @@ The following numbers are representative outputs from a 50,000-scenario run at 9
 
 These results show that quantum and classical risk metrics align within typical Monte Carlo sampling error for 50,000 paths, and that exception rates are close to the theoretical 5% expected for a 95% VaR model.
 
-## Why This Matters
+---
+
+## Conclusion
 
 This project demonstrates how quantum sampling can be integrated into real-world market-risk workflows without replacing existing classical infrastructure. Quantum methods supply alternative scenario generation while classical components still handle aggregation, limits, governance, and regulatory reporting, making the architecture realistic for bank risk desks.
 
 ---
 ## Credits
 
-Project design, implementation, and experiments by Arya.  
+Project made by Arya A Singh.  
 Built using PennyLane, NumPy, SciPy, and Matplotlib for quantum circuits, numerical routines, and visualization.
