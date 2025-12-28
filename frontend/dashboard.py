@@ -16,8 +16,13 @@ STEP_LABELS = {
     "backtesting.py": "Running Backtesting…",
 }
 
-st.title("Quantum–Classical Market Risk Platform")
-st.caption("Monte Carlo VaR / CVaR • Stress Testing • Basel Backtesting")
+st.title("Quantum Monte Carlo Market Risk System")
+st.caption(
+    "A portfolio market-risk engine comparing quantum and classical Monte Carlo scenario generation. "
+    "This dashboard presents Value-at-Risk (VaR), Conditional VaR (CVaR), stress sensitivity, "
+    "regulatory backtesting, and risk-limit governance under identical assumptions."
+)
+
 
 def api_get(path):
     r = requests.get(f"{API_BASE}{path}")
