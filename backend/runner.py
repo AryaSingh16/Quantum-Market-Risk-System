@@ -1,82 +1,78 @@
-import os
-import subprocess
-import sys
+import time
 from datetime import datetime, timezone
-from backend.config import SRC_DIR
+import logging
 
+from src.scenario_portfolio_risk import run_scenario_risk
+from src.risk_limits import run_risk_limits
+from src.backtesting import run_backtesting
+from src.stress_testing import run_stress_testing
 
-ENGINE_PIPELINE = [
-    "scenario_portfolio_risk.py",
-    "risk_limits.py",
-    "backtesting.py",
-]
-
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class EngineExecutionError(RuntimeError):
     pass
 
-
-env = os.environ.copy()
-env["PYTHONPATH"] = str(SRC_DIR.parent)
-
-
 def run_engine_pipeline(mode: str = "FULL") -> dict:
-    env["QMC_MODE"] = mode
     """
-    Executes the risk engine scripts sequentially.
-    No imports. No refactoring. Subprocess only.
+    Executes the risk engine pipeline sequentially in-process.
+    Replaces the old subprocess approach for better performance and thread-safety.
     """
-
     execution_log = {
         "start_time": datetime.now(timezone.utc).isoformat(),
         "steps": [],
         "status": "RUNNING",
     }
-
-    for script in ENGINE_PIPELINE:
-        script_path = SRC_DIR / script
-
-        step_info = {
-            "script": script,
-            "start_time": datetime.utcnow().isoformat(),
-            "return_code": None,
-        }
-
-        try:
-            completed = subprocess.run(
-                f'"{sys.executable}" "{script_path}"',
-                shell=True,                     
-                check=True,
-                capture_output=True,
-                text=True,
-                cwd=str(SRC_DIR.parent),
-                env=env,
-            )
-
-
-            step_info["return_code"] = completed.returncode
-            step_info["stdout"] = completed.stdout
-            step_info["stderr"] = completed.stderr
-            step_info["status"] = "SUCCESS"
-
-        except subprocess.CalledProcessError as e:
-            step_info["return_code"] = e.returncode
-            step_info["stdout"] = e.stdout
-            step_info["stderr"] = e.stderr
-            step_info["status"] = "FAILED"
-
-
-
-            execution_log["steps"].append(step_info)
-            execution_log["status"] = "FAILED"
-            execution_log["end_time"] = datetime.now(timezone.utc).isoformat()
-
-            raise EngineExecutionError(
-                f"Engine failed at step: {script}"
-            ) from e
-
-        execution_log["steps"].append(step_info)
-
-    execution_log["status"] = "SUCCESS"
-    execution_log["end_time"] = datetime.utcnow().isoformat()
+    
+    try:
+        # Step 1: Scenario Generation & Portfolio Risk
+        logger.info(f"Starting Scenario Risk Engine in {mode} mode")
+        start_t = time.time()
+        risk_metrics = run_scenario_risk(mode)
+        execution_log["steps"].append({
+            "script": "scenario_portfolio_risk",
+            "duration_sec": round(time.time() - start_t, 2),
+            "status": "SUCCESS"
+        })
+        
+        # Step 2: Risk Limits Governance
+        logger.info("Starting Risk Limits Check")
+        start_t = time.time()
+        limits_status = run_risk_limits()
+        execution_log["steps"].append({
+            "script": "risk_limits",
+            "duration_sec": round(time.time() - start_t, 2),
+            "status": "SUCCESS"
+        })
+        
+        # Step 3: Rolling Backtesting
+        logger.info("Starting Rolling Backtesting")
+        start_t = time.time()
+        backtest_results = run_backtesting()
+        execution_log["steps"].append({
+            "script": "backtesting",
+            "duration_sec": round(time.time() - start_t, 2),
+            "status": "SUCCESS"
+        })
+        
+        # Step 4: Volatility Stress Testing
+        logger.info("Starting Volatility Stress Testing")
+        start_t = time.time()
+        run_stress_testing(mode)
+        execution_log["steps"].append({
+            "script": "stress_testing",
+            "duration_sec": round(time.time() - start_t, 2),
+            "status": "SUCCESS"
+        })
+        
+        execution_log["status"] = "SUCCESS"
+        execution_log["end_time"] = datetime.now(timezone.utc).isoformat()
+        
+    except Exception as e:
+        logger.error(f"Pipeline failed: {str(e)}", exc_info=True)
+        execution_log["status"] = "FAILED"
+        execution_log["error"] = str(e)
+        execution_log["end_time"] = datetime.now(timezone.utc).isoformat()
+        raise EngineExecutionError(f"Engine failed: {str(e)}") from e
+        
     return execution_log

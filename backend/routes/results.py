@@ -1,9 +1,9 @@
 import numpy as np
 from fastapi import APIRouter, HTTPException
+from src.engine.database import get_connection
 from backend.config import RISK_STATE_FILE, FIGURES_DIR
 
 router = APIRouter()
-
 
 @router.get("/results/summary")
 def results_summary():
@@ -17,12 +17,15 @@ def results_summary():
             "quantum": {
                 "VaR": float(data["q_port_VaR"]),
                 "CVaR": float(data["q_port_CVaR"]),
+                "MVaR": data["q_mvar"].tolist(),
+                "ComponentVaR": data["q_comp_var"].tolist(),
             },
             "classical": {
                 "VaR": float(data["c_port_VaR"]),
                 "CVaR": float(data["c_port_CVaR"]),
             },
-        }
+        },
+        "tickers": data["tickers"].tolist() if "tickers" in data else []
     }
 
 
@@ -49,3 +52,19 @@ def results_figures():
             f.name for f in FIGURES_DIR.glob("*.png")
         )
     }
+
+@router.get("/results/backtest")
+def results_backtest():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM backtest_results ORDER BY timestamp DESC LIMIT 1')
+    row = cursor.fetchone()
+    
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="No backtest results found")
+        
+    col_names = [description[0] for description in cursor.description]
+    conn.close()
+    
+    return dict(zip(col_names, row))

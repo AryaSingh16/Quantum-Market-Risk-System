@@ -1,21 +1,21 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from backend.runner import run_engine_pipeline, EngineExecutionError
 
 router = APIRouter()
 
+def execute_pipeline_task(mode: str):
+    try:
+        run_engine_pipeline(mode)
+    except Exception as e:
+        print(f"Background execution failed: {e}")
 
 @router.post("/run")
-def run_risk_engine(mode: str = "FULL"):
-    try:
-        execution_log = run_engine_pipeline(mode)
-        return {
-            "status": "SUCCESS",
-            "message": "Risk engine executed successfully",
-            "execution_log": execution_log,
-        }
-
-    except EngineExecutionError as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e),
-        )
+def run_risk_engine(background_tasks: BackgroundTasks, mode: str = "FULL"):
+    """
+    Triggers the risk engine pipeline to run asynchronously in the background.
+    """
+    background_tasks.add_task(execute_pipeline_task, mode)
+    return {
+        "status": "ACCEPTED",
+        "message": f"Risk engine started in {mode} mode. Check results/summary when complete.",
+    }
