@@ -310,11 +310,11 @@ Quantum and classical risk metrics align within normal Monte Carlo sampling erro
 
 ### Runtime Benchmarks
 
-| Engine Mode | Scenarios / Shots | Target Use Case |
+| Engine Mode | Scenarios / Shots | Average Runtime | Target Use Case |
 |---|---|---|---|
-| **Classical Monte Carlo** | 10,000 | High-performance baseline |
-| **Quantum FAST Mode** | 2,000 | Rapid interactive debugging |
-| **Quantum FULL Mode** | 10,000 | Higher-precision simulation |
+| **Classical Monte Carlo** | 10,000 | ~0.25 secs | High-performance baseline |
+| **Quantum FAST Mode** | 2,000 | ~0.10 secs | Rapid interactive debugging |
+| **Quantum FULL Mode** | 10,000 | ~0.20 secs | Higher-precision simulation |
 
 *Note: The quantum execution time is optimized using PennyLane vectorized state-sampling methods.*
 
