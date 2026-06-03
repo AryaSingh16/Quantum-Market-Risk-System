@@ -132,7 +132,7 @@ Classical systems do this with pseudo-random number generators. **This project r
 Quantum Monte Carlo Market Risk System/
 │
 ├── src/                            # Core risk engine
-│   ├── engine/                     # Modular engine library
+│   ├── engine/                     
 │   │   ├── config.py               # All parameters (assets, qubits, limits)
 │   │   ├── quantum_engine.py       # PQC, CNOT entanglement, Cholesky mapping
 │   │   ├── risk_metrics.py         # VaR, CVaR, L-VaR, Marginal VaR
@@ -170,8 +170,7 @@ Quantum Monte Carlo Market Risk System/
 │   ├── risk_limits.json            # Governance status
 │   └── risk_system.db              # SQLite audit log
 │
-├── figures/                        # Engine-generated plots (PNG)
-├── detailsofproj.md                # Full theory guide for every section
+├── figures/                        # Engine-generated plots (PNG
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -182,7 +181,7 @@ Quantum Monte Carlo Market Risk System/
 
 ## Quickstart
 
-### Option 1 — Docker (Recommended)
+### Option 1 — Docker 
 
 ```bash
 # Clone the repository
@@ -220,10 +219,10 @@ streamlit run frontend/dashboard.py --server.port 8501
 ### Triggering a Run from the Dashboard
 
 Once the dashboard is open, use the sidebar:
-- **FAST** — 2,000 quantum shots (~10–30 seconds). Quick sanity check.
-- **FULL** — 10,000 quantum shots (~1–3 minutes). Higher-precision simulation mode.
+- **FAST** — 2,000 quantum shots. Quick sanity check.
+- **FULL** — 10,000 quantum shots. Higher-precision simulation mode.
 
-The engine runs in the background; refresh the page once complete.
+The engine runs in the background; page refreshes once complete.
 
 ---
 
@@ -267,7 +266,7 @@ BACKTEST_WINDOW  = 250                        # Rolling window (trading days)
 |---|---|---|
 | Quantum Shots | 2,000 | 10,000 |
 | Estimation Error | ~3–5% | ~1–2% |
-| Runtime | 10–30 sec | 1–3 min |
+| Runtime | 1–3 secs | 3-4 secs |
 | Use Case | Sanity check | Higher-precision simulation mode |
 
 More shots = more simulated scenarios = lower statistical error in VaR estimates.
@@ -311,11 +310,11 @@ Quantum and classical risk metrics align within normal Monte Carlo sampling erro
 
 ### Runtime Benchmarks
 
-| Engine Mode | Scenarios / Shots | Average Execution Time | Target Use Case |
+| Engine Mode | Scenarios / Shots | Target Use Case |
 |---|---|---|---|
-| **Classical Monte Carlo** | 10,000 | ~0.01 sec | High-performance baseline |
-| **Quantum FAST Mode** | 2,000 | ~0.50 sec | Rapid interactive debugging |
-| **Quantum FULL Mode** | 10,000 | ~2.00 sec | Higher-precision simulation |
+| **Classical Monte Carlo** | 10,000 | High-performance baseline |
+| **Quantum FAST Mode** | 2,000 | Rapid interactive debugging |
+| **Quantum FULL Mode** | 10,000 | Higher-precision simulation |
 
 *Note: The quantum execution time is optimized using PennyLane vectorized state-sampling methods.*
 
