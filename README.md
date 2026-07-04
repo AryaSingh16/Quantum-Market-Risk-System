@@ -45,43 +45,74 @@ Every day, banks and asset managers must compute **VaR** — the maximum expecte
 Classical systems do this with pseudo-random number generators. **This project replaces step 1 with a Parameterized Quantum Circuit (PQC)** and compares the results side-by-side.
 
 ---
-
 ## Architecture
+```mermaid
+flowchart TB
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Streamlit Dashboard                       │
-│         (VaR · CVaR · Risk Attribution · Basel Status)       │
-└───────────────────────────┬─────────────────────────────────┘
-                            │  REST API (JSON)
-┌───────────────────────────▼─────────────────────────────────┐
-│                   FastAPI Backend                            │
-│         Background Tasks · SQLite Audit Log                  │
-└───────────────────────────┬─────────────────────────────────┘
-                            │  In-Process
-┌───────────────────────────▼─────────────────────────────────┐
-│                    Risk Engine (src/)                        │
-│                                                             │
-│  ┌─────────────────────┐    ┌─────────────────────────────┐ │
-│  │  Quantum Engine      │    │  Classical Engine           │ │
-│  │  PQC + CNOT          │    │  Multivariate Normal /      │ │
-│  │  Entanglement        │    │  Student-t                  │ │
-│  │  PennyLane           │    │  NumPy                      │ │
-│  └──────────┬──────────┘    └────────────┬────────────────┘ │
-│             │  Cholesky Decomposition     │                  │
-│             └──────────────┬─────────────┘                  │
-│                            ▼                                 │
-│         Correlated Portfolio Scenario Returns                │
-│                            │                                 │
-│   ┌────────────┬───────────┴──────────────┬──────────────┐  │
-│   │ VaR/CVaR   │  Marginal VaR /          │  Rolling     │  │
-│   │ (95%, 99%) │  Component VaR           │  Backtester  │  │
-│   │ L-VaR      │  Risk Attribution        │  Basel TL    │  │
-│   └────────────┴──────────────────────────┴──────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                     SQLite Database
-                  (Execution Audit Log)
+    subgraph UI["Streamlit Dashboard"]
+        UI1["VaR · CVaR · Risk Attribution · Basel Status"]
+    end
+
+    subgraph API["FastAPI Backend"]
+        API1["Background Tasks · SQLite Audit Log"]
+    end
+
+    subgraph ENGINE["Risk Engine (src/)"]
+        direction TB
+
+        subgraph QE["Quantum Engine"]
+            direction TB
+            QE1["PQC + CNOT Entanglement"]
+            QE2["PennyLane"]
+            QE1 --> QE2
+        end
+
+        subgraph CE["Classical Engine"]
+            direction TB
+            CE1["Multivariate Normal / Student-t"]
+            CE2["NumPy"]
+            CE1 --> CE2
+        end
+
+        CHOL["Cholesky Decomposition"]
+        SCEN["Correlated Portfolio Scenario Returns"]
+
+        subgraph OUT["Risk Outputs"]
+            direction LR
+            O1["VaR/CVaR (95%, 99%)<br/>L-VaR"]
+            O2["Marginal VaR / Component VaR<br/>Risk Attribution"]
+            O3["Rolling Backtester<br/>Basel TL"]
+        end
+
+        QE2 --> CHOL
+        CE2 --> CHOL
+        CHOL --> SCEN
+        SCEN --> O1
+        SCEN --> O2
+        SCEN --> O3
+    end
+
+    DB[("SQLite Database<br/>(Execution Audit Log)")]
+
+    UI1 -->|"REST API (JSON)"| API1
+    API1 -->|"In-Process"| ENGINE
+    ENGINE --> DB
+
+    classDef dashboard fill:#EAF2FF,stroke:#2F5AA8,stroke-width:2px,color:#1B2A41
+    classDef backend fill:#E8F4FD,stroke:#1F78B4,stroke-width:2px,color:#1B2A41
+    classDef quantum fill:#EAF7F4,stroke:#148F77,stroke-width:2px,color:#0B3D2E
+    classDef classical fill:#FFF4E5,stroke:#C27C0E,stroke-width:2px,color:#5C3A00
+    classDef process fill:#F3F4F6,stroke:#4B5563,stroke-width:2px,color:#1F2937
+    classDef output fill:#EEF6FF,stroke:#2563EB,stroke-width:2px,color:#1E3A8A
+    classDef database fill:#F4ECF7,stroke:#7D3C98,stroke-width:2px,color:#4A235A
+
+    class UI1 dashboard
+    class API1 backend
+    class QE1,QE2 quantum
+    class CE1,CE2 classical
+    class CHOL,SCEN process
+    class O1,O2,O3 output
+    class DB database
 ```
 
 | Layer | Component | Technology |
